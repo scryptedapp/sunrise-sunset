@@ -1,6 +1,6 @@
 {
    "name": "@scrypted/sunrise-sunset",
-   "version": "0.0.1",
+   "version": "0.0.2",
    "license": "Apache-2.0",
    "description": "Sunrise-Sunset Sensors for Scrypted",
    "keywords": [
