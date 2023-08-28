@@ -53,18 +53,23 @@ class SunriseSunsetSensor extends ScryptedDeviceBase implements BinarySensor, Se
         const positionSensor = this.storageSettings.values.linkedPositionSensor as ScryptedDevice & PositionSensor;
         this.positionListener = positionSensor.listen(ScryptedInterface.PositionSensor, () => this.setupSensor());
 
+        // due to odd timezone behavior, we are calculating solar values for multiple days
+        // to ensure the next event can be calculated properly
         const todayMidnight = new Date();
         todayMidnight.setHours(0, 0, 0, 0);
-        const tomorrowMidnight = new Date();
-        tomorrowMidnight.setHours(24, 0, 0, 0);
+        const tomorrowMidnight = new Date(todayMidnight);
+        tomorrowMidnight.setDate(tomorrowMidnight.getDate() + 1);
+        const dayAfterTomorrowMidnight = new Date(tomorrowMidnight);
+        dayAfterTomorrowMidnight.setDate(tomorrowMidnight.getDate() + 1);
 
         const todayTimes = SunCalc.getTimes(todayMidnight, positionSensor.position.latitude, positionSensor.position.longitude);
         const tomorrowTimes = SunCalc.getTimes(tomorrowMidnight, positionSensor.position.latitude, positionSensor.position.longitude);
+        const dayAfterTomorrowTimes = SunCalc.getTimes(dayAfterTomorrowMidnight, positionSensor.position.latitude, positionSensor.position.longitude);
 
         if (this.storageSettings.values.mode == "sunrise") {
-            this.doSunrise(todayTimes) || this.doSunrise(tomorrowTimes);
+            this.doSunrise(todayTimes) || this.doSunrise(tomorrowTimes) || this.doSunrise(dayAfterTomorrowTimes);
         } else {
-            this.doSunset(todayTimes) || this.doSunset(tomorrowTimes);
+            this.doSunset(todayTimes) || this.doSunset(tomorrowTimes) || this.doSunrise(dayAfterTomorrowTimes);
         }
     }
 
