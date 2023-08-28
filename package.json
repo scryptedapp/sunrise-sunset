@@ -1,8 +1,15 @@
 {
-   "name": "@scrypted/vscode-typescript",
+   "name": "@scrypted/sunrise-sunset",
+   "version": "0.0.0",
+   "license": "Apache-2.0",
+   "description": "Sunrise-Sunset Sensors for Scrypted",
+   "keywords": [
+      "scrypted",
+      "plugin",
+      "sunrise",
+      "sunset"
+   ],
    "scripts": {
-      "scrypted-setup-project": "scrypted-setup-project",
-      "prescrypted-setup-project": "scrypted-package-json",
       "build": "scrypted-webpack",
       "prepublishOnly": "NODE_ENV=production scrypted-webpack",
       "prescrypted-vscode-launch": "scrypted-webpack",
@@ -11,20 +18,25 @@
       "scrypted-debug": "scrypted-debug",
       "scrypted-deploy": "scrypted-deploy",
       "scrypted-readme": "scrypted-readme",
-      "scrypted-package-json": "scrypted-package-json"
+      "scrypted-package-json": "scrypted-package-json",
+      "scrypted-webpack": "scrypted-webpack"
    },
    "scrypted": {
-      "name": "TypeScript Light",
-      "type": "Light",
+      "name": "Sunrise-Sunset Plugin",
+      "type": "DeviceProvider",
       "interfaces": [
-         "OnOff"
+         "DeviceProvider",
+         "DeviceCreator"
       ]
    },
    "dependencies": {
-      "axios": "^0.24.0"
+      "axios": "^1.4.0",
+      "suncalc": "^1.9.0"
    },
    "devDependencies": {
-      "@scrypted/sdk": "^0.2.49",
-      "@types/node": "^18.15.8"
+      "@scrypted/sdk": "^0.2.103",
+      "@types/node": "^17.0.24",
+      "@types/suncalc": "^1.9.0",
+      "webpack-bundle-analyzer": "^4.5.0"
    }
 }
