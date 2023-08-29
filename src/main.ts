@@ -69,7 +69,7 @@ class SunriseSunsetSensor extends ScryptedDeviceBase implements BinarySensor, Se
         if (this.storageSettings.values.mode == "sunrise") {
             this.doSunrise(todayTimes) || this.doSunrise(tomorrowTimes) || this.doSunrise(dayAfterTomorrowTimes);
         } else {
-            this.doSunset(todayTimes) || this.doSunset(tomorrowTimes) || this.doSunrise(dayAfterTomorrowTimes);
+            this.doSunset(todayTimes) || this.doSunset(tomorrowTimes) || this.doSunset(dayAfterTomorrowTimes);
         }
     }
 
@@ -102,7 +102,7 @@ class SunriseSunsetSensor extends ScryptedDeviceBase implements BinarySensor, Se
         let hasEvent = false;
         if (times.sunsetStart.getTime() > now) {
             const delay = times.sunsetStart.getTime() - now;
-            this.console.log(`Nest sunset start will be ${new Date(Date.now() + delay)}`);
+            this.console.log(`Next sunset start will be ${new Date(Date.now() + delay)}`);
             this.startTimeout = setTimeout(() => this.trigger(), delay);
             hasEvent = true;
         }
