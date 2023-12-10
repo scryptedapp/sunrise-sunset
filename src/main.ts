@@ -21,7 +21,7 @@ class SunriseSunsetSensor extends ScryptedDeviceBase implements BinarySensor, Se
         mode: {
             title: 'Mode',
             value: this.storage.getItem('mode'),
-            choices: ['sunrise', 'sunset'],
+            choices: ['sunrise', 'sunset', 'daytime', 'nighttime'],
         }
     });
 
@@ -66,10 +66,19 @@ class SunriseSunsetSensor extends ScryptedDeviceBase implements BinarySensor, Se
         const tomorrowTimes = SunCalc.getTimes(tomorrowMidnight, positionSensor.position.latitude, positionSensor.position.longitude);
         const dayAfterTomorrowTimes = SunCalc.getTimes(dayAfterTomorrowMidnight, positionSensor.position.latitude, positionSensor.position.longitude);
 
-        if (this.storageSettings.values.mode == "sunrise") {
-            this.doSunrise(todayTimes) || this.doSunrise(tomorrowTimes) || this.doSunrise(dayAfterTomorrowTimes);
-        } else {
-            this.doSunset(todayTimes) || this.doSunset(tomorrowTimes) || this.doSunset(dayAfterTomorrowTimes);
+        switch (this.storageSettings.values.mode) {
+            case 'sunrise':
+                this.doSunrise(todayTimes) || this.doSunrise(tomorrowTimes) || this.doSunrise(dayAfterTomorrowTimes);
+                break;
+            case 'sunset':
+                this.doSunset(todayTimes) || this.doSunset(tomorrowTimes) || this.doSunset(dayAfterTomorrowTimes);
+                break;
+            case 'daytime':
+                this.doDayTime(todayTimes, tomorrowTimes);
+                break;
+            case 'nighttime':
+                this.doNightTime(todayTimes, tomorrowTimes);
+                break;
         }
     }
 
@@ -113,6 +122,40 @@ class SunriseSunsetSensor extends ScryptedDeviceBase implements BinarySensor, Se
             hasEvent = true;
         }
         return hasEvent;
+    }
+
+    doDayTime(today: SunCalc.GetTimesResult, tomorrow: SunCalc.GetTimesResult): void {
+        const now = Date.now();
+        if (now > today.sunrise.getTime() && now < today.sunsetStart.getTime()) {
+            this.trigger();
+            const delay = today.sunsetStart.getTime() - now;
+            this.console.log(`It's daytime, end will be ${new Date(Date.now() + delay)}`);
+            this.endTimeout = setTimeout(() => this.untrigger(), delay);
+        } else {
+            this.binaryState = false;
+            const start = tomorrow.sunrise.getTime() - now;
+            const end = tomorrow.sunsetStart.getTime() - now;
+            this.console.log(`Next daytime will be ${new Date(Date.now() + start)}`);
+            this.startTimeout = setTimeout(() => this.trigger(), start);
+            this.endTimeout = setTimeout(() => this.untrigger(), end);
+        }
+    }
+
+    doNightTime(today: SunCalc.GetTimesResult, tomorrow: SunCalc.GetTimesResult): void {
+        const now = Date.now();
+        if (now > today.sunsetStart.getTime() && now < tomorrow.sunrise.getTime()) {
+            this.trigger();
+            const delay = tomorrow.sunrise.getTime() - now;
+            this.console.log(`It's nighttime, end will be ${new Date(Date.now() + delay)}`);
+            this.endTimeout = setTimeout(() => this.untrigger(), delay);
+        } else {
+            this.binaryState = false;
+            const start = tomorrow.sunsetStart.getTime() - now;
+            const end = tomorrow.sunrise.getTime() - now;
+            this.console.log(`Next nighttime will be ${new Date(Date.now() + start)}`);
+            this.startTimeout = setTimeout(() => this.trigger(), start);
+            this.endTimeout = setTimeout(() => this.untrigger(), end);
+        }
     }
 
     trigger(): void {
